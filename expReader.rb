@@ -16,7 +16,11 @@ class Operator
   end
 
   def self.is_operator?(char)
-    return true if @@operators.include?(char) else false
+    return result = if @@operators.include?(char)
+                      true
+                    else
+                      false
+                    end
   end
  
   def association
