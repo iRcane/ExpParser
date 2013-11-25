@@ -30,6 +30,18 @@ class Operator
   def operator
     @operator
   end
+  
+  def ==(x)
+    return result = if @operator == x 
+                      true
+                    else
+                      false
+                    end
+  end
+  
+  def to_str
+    return @operator
+  end
 end
 
 class Function
@@ -53,6 +65,14 @@ class Function
   
   def function
     @function
+  end
+
+  def ==(x)
+    return result = if @function == x
+                      true
+                    else
+                      false
+                    end
   end
 end
 
@@ -78,6 +98,14 @@ class Bracket
   def bracket
     @bracket
   end
+
+  def ==(x)
+    return result = if @bracket == x
+                      true
+                    else
+                      false
+                    end
+  end
 end
 
 class Expression
@@ -99,10 +127,10 @@ class Expression
       when :function
         @stack << x[:token]
       when :bracket
-        if x.bracket == '('
+        if x[:token] == '('
           @stack << x[:token]
         else
-          until @stack.last.bracket == '(' do
+          until @stack.last == '(' do
             @output << @stack.pop
             if @stack.last == nil
               raise NotExpected.new("Brackets mismatch occured")
@@ -111,9 +139,6 @@ class Expression
           end
           if @stack.last == '('
             @stack.pop
-          end
-          if Function.is_function(@stack.last.function)
-            @output << @stack.pop 
           end
         end
       when :num
