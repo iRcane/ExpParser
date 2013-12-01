@@ -136,37 +136,37 @@ class Expression
       when :operator
         if not @stack.empty?
           if x[:token].association == :right_associative
-            while x[:token].priority < @stack.last.priority
+            while x[:token].priority < @stack.last()[:token].priority
               @output << @stack.pop
               break if @stack.last == nil
             end
           else
-            while x[:token].priority <= @stack.last.priority
+            while x[:token].priority <= @stack.last()[:token].priority
               @output << @stack.pop
               break if @stack.last == nil
             end
           end
         end
-        @stack << x[:token]
+        @stack << x
       when :function
-        @stack << x[:token]
+        @stack << x
       when :bracket
         if x[:token] == '('
-          @stack << x[:token]
+          @stack << x
         else
-          until @stack.last == '(' do
+          until @stack.last()[:token] == '(' do
             @output << @stack.pop
             if @stack.last == nil
               raise NotExpected.new("Brackets mismatch occured")
               break
             end
           end
-          if @stack.last == '('
+          if @stack.last()[:token] == '('
             @stack.pop
           end
         end
       when :num
-        @output << x[:token]
+        @output << x
       else
         p "Unknown tokenize() result"
       end
@@ -228,7 +228,9 @@ class Calc
     exp = gets.to_s
     expression = Expression.new(exp)
     exp_in_rpn = expression.to_rpn
-    p exp_in_rpn.to_s
+    exp_in_rpn.each do |token|
+        p token.to_s
+    end
   end
 end
 
