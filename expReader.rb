@@ -110,7 +110,10 @@ class Bracket
   def bracket
     @bracket
   end
-
+  
+  def priority
+    return 0
+  end
   def ==(x)
     return result = if @bracket == x
                       true
@@ -128,20 +131,22 @@ class Expression
   end
 
   def to_rpn
-    p @exp
     index = 0
     while @exp[index] != nil
       x = tokenize(index)
-      p x.to_s
       case x[:type]
       when :operator
-        if x[:token].association == :right_associative
-          while x[:token].priority < @stack.last.priority
-            @output << @stack.pop
-          end
-        elsif x[:token].association == :left_associative
-          while x[:token].priority <= @stack.last.priority
-            @output << @stack.pop
+        if not @stack.empty?
+          if x[:token].association == :right_associative
+            while x[:token].priority < @stack.last.priority
+              @output << @stack.pop
+              break if @stack.last == nil
+            end
+          else
+            while x[:token].priority <= @stack.last.priority
+              @output << @stack.pop
+              break if @stack.last == nil
+            end
           end
         end
         @stack << x[:token]
@@ -169,10 +174,8 @@ class Expression
       end
       index = x[:index]
     end
-
-    p "#{@stack.to_s} - #{@output}"
-    
-    
+    @output << @stack.pop
+    return @output
   end
   
   private
@@ -189,10 +192,10 @@ class Expression
       return {:token => Bracket.new(buf), :type => :bracket, :index => i}
     end
     
-    if ('a'..'z').to_a.include?(buf.split("").last)
+    if ('a'..'z').include?(buf[-1])
       until Operator.is_operator?(@exp[i]) or 
             Bracket.is_bracket?(@exp[i]) or
-            ('0'..'9').to_a.include?(@exp[i]) or
+            ('0'..'9').include?(@exp[i]) or
             @exp[i] == nil
         buf << @exp[i]
         i += 1
@@ -200,10 +203,10 @@ class Expression
       return {:token => Function.new(buf), :type => :function, :index => i}
     end
     
-    if ('0'..'9').to_a.include?(buf.split("").last)
+    if ('0'..'9').include?(buf[-1])
       until Operator.is_operator?(@exp[i]) or 
             Bracket.is_bracket?(@exp[i]) or
-            ('a'..'z').to_a.include?(@exp[i]) or
+            ('a'..'z').include?(@exp[i]) or
             @exp[i] == nil
         buf << @exp[i]
         i += 1
@@ -224,7 +227,8 @@ class Calc
   def run
     exp = gets.to_s
     expression = Expression.new(exp)
-    expression.to_rpn
+    exp_in_rpn = expression.to_rpn
+    p exp_in_rpn.to_s
   end
 end
 
