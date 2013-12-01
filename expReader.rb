@@ -52,12 +52,10 @@ end
 
 class Function
   @@functions = {"sin" => :fd}
-  @@priorities = {"sin" => 2}
   
   def initialize(string)
     if @@functions.include?(string)
       @function = string
-      @priority = @@priorities[string]
     else
       raise NotExpected.new("Unknown function: #{string}")
     end
@@ -76,7 +74,7 @@ class Function
   end
   
   def priority
-    @priority
+    0
   end
 
   def ==(x)
@@ -127,7 +125,7 @@ class Expression
   def initialize(exp)
     @exp = exp.chomp.delete " "
     @stack = []
-    @output = ""
+    @output = []
   end
 
   def to_rpn
@@ -174,7 +172,9 @@ class Expression
       end
       index = x[:index]
     end
-    @output << @stack.pop
+    while not @stack.empty?
+      @output << @stack.pop
+    end
     return @output
   end
   
