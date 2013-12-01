@@ -5,11 +5,13 @@ end
 class Operator
   @@operators = {"+" => :left_associative, "-" => :left_associative, \
     "*" => :left_associative, "/" => :left_associative, "^" => :right_associative}
+  @@priorities = {"^" => 3, "*" => 2, "/" => 2, "-" => 1, "+" => 1}
   
   def initialize(char)
     if @@operators.include?(char)
       @operator = char
       @association = @@operators[char]
+      @priority = @@priorities[char]
     else
       raise NotExpected.new("Unknown operator: #{char}")
     end
@@ -22,7 +24,11 @@ class Operator
                       false
                     end
   end
- 
+  
+  def priority
+    @priority
+  end
+  
   def association
     @association
   end
@@ -46,10 +52,12 @@ end
 
 class Function
   @@functions = {"sin" => :fd}
+  @@priorities = {"sin" => 2}
   
   def initialize(string)
     if @@functions.include?(string)
       @function = string
+      @priority = @@priorities[string]
     else
       raise NotExpected.new("Unknown function: #{string}")
     end
@@ -65,6 +73,10 @@ class Function
   
   def function
     @function
+  end
+  
+  def priority
+    @priority
   end
 
   def ==(x)
@@ -123,6 +135,15 @@ class Expression
       p x.to_s
       case x[:type]
       when :operator
+        if x[:token].association == :right_associative
+          while x[:token].priority < @stack.last.priority
+            @output << @stack.pop
+          end
+        elsif x[:token].association == :left_associative
+          while x[:token].priority <= @stack.last.priority
+            @output << @stack.pop
+          end
+        end
         @stack << x[:token]
       when :function
         @stack << x[:token]
