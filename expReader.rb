@@ -229,10 +229,32 @@ class Calc
     expression = Expression.new(exp)
     exp_in_rpn = expression.to_rpn
     exp_in_rpn.each do |token|
-        p token.to_s
+    if token.class == Function
+      case token.function
+      when "sin"
+        @stack << Math.sin(@stack.reverse.pop)
+      end
+      next
     end
-  end
-end
+    if token.class == Operator
+      case token.operator
+      when "+"
+      @stack << @stack.reverse.pop + @stack.reverse.pop
+      when "-"
+      @stack << @stack.reverse.pop - @stack.reverse.pop
+      when "*"
+      @stack << @stack.reverse.pop * @stack.reverse.pop
+      when "/"
+      @stack << @stack.reverse.pop / @stack.reverse.pop
+      when "^"
+      @stack << @stack.reverse.pop ** @stack.reverse.pop
+      end
+      next
+    end
+    @stack << token.to_s
+    end
+      end
+    end
 
 calc = Calc.new
 calc.run
